@@ -1,0 +1,111 @@
+/* 약관·개인정보처리방침 공용 스타일.
+   앱 안에서 여는 게 아니라 브라우저로 여는 문서라, 앱 CSS 와 섞지 않고 따로 둔다.
+   심사원과 이용자가 폰에서 읽는다는 전제로 글자를 크게 잡았다. */
+
+:root {
+  --ink: #1b241d;
+  --muted: #626d66;
+  --line: #e6ebe7;
+  --accent: #57936b;
+  --bg: #ffffff;
+  --panel: #f5f8f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #edf3ee;
+    --muted: #a9b4ac;
+    --line: #29342d;
+    --accent: #8fcaa3;
+    --bg: #101512;
+    --panel: #1a211c;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 20px 72px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  -webkit-text-size-adjust: 100%;
+}
+
+main { max-width: 680px; margin: 0 auto; padding-top: 44px; }
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+
+h1 {
+  margin: 10px 0 18px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.9px;
+  line-height: 1.25;
+}
+
+h2 {
+  margin: 38px 0 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+}
+
+p { margin: 0 0 14px; }
+.lead { color: var(--muted); }
+
+ul { margin: 0 0 14px; padding-left: 20px; }
+li { margin-bottom: 7px; }
+
+a { color: var(--accent); }
+
+table {
+  width: 100%;
+  margin: 0 0 16px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* 표는 폰에서 넘칠 수 있다. 가로로만 밀리게 두고 본문은 안 밀리게 한다. */
+table { display: block; overflow-x: auto; }
+
+th, td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px 10px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+th { color: var(--muted); font-size: 12px; font-weight: 600; }
+
+.callout {
+  margin: 0 0 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 16px;
+  background: var(--panel);
+}
+
+.note { color: var(--muted); font-size: 14px; }
+
+.date {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.back { font-size: 14px; }
