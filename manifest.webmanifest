@@ -1,0 +1,17 @@
+{
+  "name": "위드모아",
+  "short_name": "위드모아",
+  "description": "코인 급변 뉴스 타임라인",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#6dbe8d",
+  "icons": [
+    { "src": "./icons/withmoa-rounded-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/withmoa-rounded-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icons/withmoa-square-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
