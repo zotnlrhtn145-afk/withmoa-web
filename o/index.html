@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>위드모아</title>
+  <meta property="og:title" content="위드모아" />
+  <meta property="og:description" content="앱에서 이 글을 엽니다." />
+  <link rel="stylesheet" href="../legal.css" />
+  <style>
+    /* 이 페이지는 대개 0.5초만 보인다. 앱이 없을 때만 끝까지 읽힌다. */
+    body { display: grid; place-items: center; min-height: 100vh; margin: 0;
+           font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+           background: #fff; color: #161616; padding: 24px; }
+    .box { max-width: 340px; text-align: center; }
+    .mark { width: 56px; height: 56px; border-radius: 16px; background: #4AA66E;
+            display: grid; place-items: center; margin: 0 auto 18px; }
+    .mark span { color: #fff; font-size: 26px; font-weight: 800; }
+    h1 { font-size: 18px; margin: 0 0 8px; letter-spacing: -0.4px; }
+    p { font-size: 13px; line-height: 1.6; color: #69756D; margin: 0 0 22px; }
+    a.btn { display: block; text-decoration: none; font-size: 14px; font-weight: 700;
+            padding: 13px; border-radius: 12px; margin-bottom: 9px; }
+    .primary { background: #4AA66E; color: #fff; }
+    .ghost { background: #F1F4F2; color: #2B3630; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="mark"><span>위</span></div>
+    <h1>위드모아에서 여는 중…</h1>
+    <p>앱이 열리지 않으면 아래에서 받아 주세요.<br />승인된 회원만 볼 수 있습니다.</p>
+    <a class="btn primary" id="open" href="#">앱에서 열기</a>
+    <a class="btn ghost" href="https://github.com/zotnlrhtn145-afk/withmoa-web/releases/latest/download/withmoa.apk">안드로이드 앱 받기</a>
+    <a class="btn ghost" href="https://testflight.apple.com/">아이폰 · TestFlight</a>
+  </div>
+
+  <script>
+    // 공유 주소는 https 여야 한다. 카카오톡·문자에 app.withmoa:// 를 그대로 넣으면
+    // 링크로 인식되지 않아 눌리지도 않는다. 그래서 이 페이지를 한 번 거쳐
+    // 앱 주소로 넘긴다 — 앱이 있으면 0.5초 만에 앱이 뜨고, 없으면 이 화면이 남는다.
+    var params = new URLSearchParams(location.search);
+    var id = params.get("n");
+    var kind = params.get("k") === "e" ? "event" : "news";
+    var deep = id ? "app.withmoa://" + kind + "/" + id : "app.withmoa://";
+
+    document.getElementById("open").href = deep;
+    location.replace(deep);
+  </script>
+</body>
+</html>
