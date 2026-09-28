@@ -1,50 +1,26 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>위드모아</title>
-  <meta property="og:title" content="위드모아" />
-  <meta property="og:description" content="앱에서 이 글을 엽니다." />
-  <link rel="stylesheet" href="../legal.css" />
-  <style>
-    /* 이 페이지는 대개 0.5초만 보인다. 앱이 없을 때만 끝까지 읽힌다. */
-    body { display: grid; place-items: center; min-height: 100vh; margin: 0;
-           font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-           background: #fff; color: #161616; padding: 24px; }
-    .box { max-width: 340px; text-align: center; }
-    .mark { width: 56px; height: 56px; border-radius: 16px; background: #4AA66E;
-            display: grid; place-items: center; margin: 0 auto 18px; }
-    .mark span { color: #fff; font-size: 26px; font-weight: 800; }
-    h1 { font-size: 18px; margin: 0 0 8px; letter-spacing: -0.4px; }
-    p { font-size: 13px; line-height: 1.6; color: #69756D; margin: 0 0 22px; }
-    a.btn { display: block; text-decoration: none; font-size: 14px; font-weight: 700;
-            padding: 13px; border-radius: 12px; margin-bottom: 9px; }
-    .primary { background: #4AA66E; color: #fff; }
-    .ghost { background: #F1F4F2; color: #2B3630; }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <div class="mark"><span>위</span></div>
-    <h1>위드모아에서 여는 중…</h1>
-    <p>앱이 열리지 않으면 아래에서 받아 주세요.<br />승인된 회원만 볼 수 있습니다.</p>
-    <a class="btn primary" id="open" href="#">앱에서 열기</a>
-    <a class="btn ghost" href="https://github.com/zotnlrhtn145-afk/withmoa-web/releases/latest/download/withmoa.apk">안드로이드 앱 받기</a>
-    <a class="btn ghost" href="https://testflight.apple.com/">아이폰 · TestFlight</a>
-  </div>
-
-  <script>
-    // 공유 주소는 https 여야 한다. 카카오톡·문자에 app.withmoa:// 를 그대로 넣으면
-    // 링크로 인식되지 않아 눌리지도 않는다. 그래서 이 페이지를 한 번 거쳐
-    // 앱 주소로 넘긴다 — 앱이 있으면 0.5초 만에 앱이 뜨고, 없으면 이 화면이 남는다.
-    var params = new URLSearchParams(location.search);
-    var id = params.get("n");
-    var kind = params.get("k") === "e" ? "event" : "news";
-    var deep = id ? "app.withmoa://" + kind + "/" + id : "app.withmoa://";
-
-    document.getElementById("open").href = deep;
-    location.replace(deep);
-  </script>
-</body>
-</html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>위드핀덱스 · 공유된 분석</title><meta property="og:title" content="위드핀덱스 · 시장의 흐름과 판단의 근거"><meta property="og:description" content="공유된 일정과 시장 분석을 로그인 없이 읽어보세요."><meta name="referrer" content="strict-origin-when-cross-origin"><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7f5;color:#17271f;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif}header,main{max-width:720px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between}header a{font-weight:700;color:#3d6d54;text-decoration:none}main{background:white;min-height:80vh;border-radius:24px 24px 0 0}h1{font-size:28px;line-height:1.4;letter-spacing:-.7px}h2{font-size:18px;margin:28px 0 10px}p{white-space:pre-line;line-height:1.85;overflow-wrap:anywhere}small{display:block;color:#6f7a74;font-size:12px}button,.button{border:0;border-radius:30px;padding:12px 18px;background:#e7f2eb;color:#315e47;font:inherit;font-weight:600;cursor:pointer}#summary{font-size:18px}#notice{font-size:13px}#caution{font-size:14px;border-top:1px solid #e9eeeb;padding-top:20px}#source{display:inline-block;color:#3d6d54;margin:16px 0}footer{font-size:12px;color:#6f7a74;margin-top:30px;line-height:1.7}a{overflow-wrap:anywhere}button:focus-visible,a:focus-visible{outline:3px solid #315e47;outline-offset:4px}
+</style></head><body><header><a href="../">위드핀덱스</a><button id="share">공유</button></header><main aria-live="polite"><small id="time"></small><h1 id="title">공유된 내용을 불러오고 있어요.</h1><p id="summary"></p><div id="sections"></div><p id="caution" hidden></p><a id="source" hidden target="_blank" rel="noopener noreferrer">원문 출처 ↗</a><p id="notice" role="status"></p><button id="retry" hidden>다시 불러오기</button><footer>정보와 분석의 기준 시각을 확인해 주세요.<br>토론방 참여에는 로그인이 필요합니다.</footer></main><script>
+const API="https://nqdeyeonxabotddzibmx.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xZGV5ZW9ueGFib3RkZHppYm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMjkxNTIsImV4cCI6MjEwMjgwNTE1Mn0.60xlEXLypRK5MVGo2t-vzPSmvb9I12j887wgW2iIUTQ";
+const params=new URLSearchParams(location.search),kind=params.get('k')||'n',id=params.get('n')||'';
+const el=id=>document.getElementById(id);let title='위드핀덱스';
+const clean=v=>typeof v==='string'?v.replace(/\*\*/g,'').trim():'';
+async function load(){
+ el('retry').hidden=true;el('notice').textContent='';el('sections').replaceChildren();
+ try{
+  if(!['n','c','m','s'].includes(kind)||id.length>80||(['n','c'].includes(kind)&&!(/^[1-9]\d{0,17}$/.test(id))))throw Error('invalid');
+  const response=await fetch(API+'/rest/v1/rpc/read_shared_content',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kind:kind,p_id:id}),signal:AbortSignal.timeout(15000)});
+  if(!response.ok)throw Error('network');const data=await response.json();if(!data)throw Error('missing');
+  title=clean(data.title)||'공유된 분석';el('title').textContent=title;document.title=title+' · 위드핀덱스';
+  const seen=new Set([title]);const unique=v=>{const s=clean(v),k=s.replace(/\s+/g,' ');if(!s||seen.has(k))return '';seen.add(k);return s};
+  el('summary').textContent=unique(data.summary);
+  const at=new Date(data.at);el('time').textContent=Number.isNaN(+at)?'':(data.time_label||'자료 기준 · 한국시간')+' '+at.toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
+  for(const s of data.sections||[]){const body=unique(s.body);if(!body)continue;const section=document.createElement('section'),h=document.createElement('h2'),p=document.createElement('p');h.textContent=clean(s.title);p.textContent=body;section.append(h,p);el('sections').append(section)}
+  const caution=unique(data.caution);el('caution').textContent=caution;el('caution').hidden=!caution;
+  if(typeof data.source_url==='string'&&data.source_url.startsWith('https://')){el('source').href=data.source_url;el('source').hidden=false}
+  if(['m','s'].includes(kind))el('notice').textContent='이 링크는 최신 분석으로 갱신됩니다. 위 기준 시각을 확인해 주세요.';
+ }catch(e){el('title').textContent=e.message==='invalid'?'올바르지 않은 공유 주소예요.':e.message==='missing'?'공개된 내용을 찾을 수 없어요.':'일시적으로 내용을 불러오지 못했어요.';el('summary').textContent='';el('retry').hidden=e.message==='invalid'||e.message==='missing';}
+}
+el('retry').onclick=load;
+el('share').onclick=async()=>{try{if(navigator.share)await navigator.share({title,text:title,url:location.href});else{await navigator.clipboard.writeText(location.href);el('notice').textContent='링크를 복사했어요. 카카오톡에 붙여넣어 주세요.'}}catch(e){if(e.name!=='AbortError')window.prompt('이 주소를 복사해 공유하세요.',location.href)}};
+load();</script></body></html>
