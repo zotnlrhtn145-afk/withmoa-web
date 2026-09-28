@@ -1,5 +1,5 @@
 /**
- * 위드모아 서비스 워커 — 푸시 알림만 담당한다.
+ * 위드핀덱스 서비스 워커 — 푸시 알림만 담당한다.
  *
  * 오프라인 캐시는 일부러 넣지 않았다. 이 앱은 "지금 뭐가 터졌나"를 보는 앱이라
  * 옛 화면을 캐시에서 꺼내 보여 주는 게 도움이 안 된다. 오히려 낡은 시세·뉴스를
@@ -23,14 +23,14 @@ self.addEventListener("push", (event) => {
   try {
     payload = event.data ? event.data.json() : {};
   } catch {
-    payload = { title: "위드모아", body: event.data ? event.data.text() : "" };
+    payload = { title: "위드핀덱스", body: event.data ? event.data.text() : "" };
   }
 
-  const title = payload.title || "위드모아";
+  const title = payload.title || "위드핀덱스";
   const options = {
     body: payload.body || "",
-    icon: "./icons/withmoa-rounded-192.png",
-    badge: "./icons/withmoa-rounded-192.png",
+    icon: "./icons/withfindex-192.png?v=20260929",
+    badge: "./icons/withfindex-badge.png?v=20260929",
     // 같은 급변으로 알림이 여러 개 쌓이지 않게 한다. 뒤엣것이 앞엣것을 덮어쓴다.
     tag: payload.tag || "withmoa",
     renotify: true,
