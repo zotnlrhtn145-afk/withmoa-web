@@ -2,7 +2,7 @@
 (() => {
   if (!document.body.classList.contains('detail-page')) return;
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
-  if (preference.matches || !('IntersectionObserver' in window)) return;
+  if (matchMedia('(max-width: 760px)').matches || preference.matches || !('IntersectionObserver' in window)) return;
   const body = document.body;
   const clamp = value => Math.max(0, Math.min(1, value));
   const scenes = [...document.querySelectorAll('main > section')];

@@ -12,7 +12,7 @@
   if ('IntersectionObserver' in window) {
     observer = new IntersectionObserver(entries => entries.forEach(({ target, isIntersecting }) => {
       target.classList.toggle('visual-on-screen', isIntersecting);
-      if (isIntersecting && !target.classList.contains('is-playing')) play(target);
+      if (isIntersecting && !matchMedia('(max-width: 760px)').matches && !target.classList.contains('is-playing')) play(target);
     }), { threshold: .2 });
     figures.forEach(figure => observer.observe(figure));
   } else figures.forEach(figure => figure.classList.add('visual-on-screen'));

@@ -7,7 +7,7 @@ if (/Android/i.test(navigator.userAgent)) {
 const clean = value => typeof value === 'string' ? value.replace(/\\n/g, '\n').replace(/\*\*/g, '').trim() : '';
 // Keep the shared page consistent with the native analysis block ledger.
 function displaySections(sections, initial = []) {
- const key = text => clean(text).replace(/\s+/g, ' ');
+ const key = text => clean(text).replace(/\n한국시간 \d[\s\S]*$/, '').replace(/\s+/g, ' ');
  const seen = new Set(initial.map(key));
  return sections.filter(section => {
   const body = key(section.body);
@@ -24,7 +24,7 @@ const canonical=new URL('https://withfindex.com/o/'); canonical.searchParams.set
 let article, selected='';
 function source(parent,url,label='근거 원문 보기 ↗'){const href=safeURL(url);if(!href)return;const a=node('a',label,'source');a.href=href;a.target='_blank';a.rel='noopener noreferrer';parent.append(a);}
 function card(title,cls=''){const e=node('section',null,'card '+cls);if(title)e.append(node('h2',title));return e;}
-function prose(parent,text){for(const line of clean(text).split(/\n+/).filter(Boolean)){const pair=line.match(/^([^:]+):\s*([^:]+)\s*→\s*([^:]+)$/);if(pair){const a=number(pair[2]),b=number(pair[3]);if(a&&b&&a.unit===b.unit){parent.append(node('h3',pair[1]),bars([{label:'이전',value:a.value,text:pair[2]},{label:'이후',value:b.value,text:pair[3]}]));continue;}}parent.append(node('p',line));}}
+function prose(parent,text){for(const line of clean(text).split(/\n+/).filter(Boolean)){const pair=line.match(/^([^:]+):\s*([^:]+)\s*→\s*([^:]+)$/);if(pair){const a=number(pair[2]),b=number(pair[3]);if(a&&b&&a.unit===b.unit){parent.append(node('h3',pair[1]),bars([{label:'이전',value:a.value,text:pair[2]},{label:'이후',value:b.value,text:pair[3]}]));continue;}}const p=node('p');const first=line.match(/^[^\n]+?(?:[.!?](?=\s|$)|$)/)?.[0];if(!parent.querySelector('strong')&&first&&first.length>=10&&first.length<=180){p.append(node('strong',first),document.createTextNode(line.slice(first.length)));}else p.textContent=line;parent.append(p);}}
 function number(raw){const t=String(raw??'').trim().replace(/−/g,'-'),m=t.match(/^(\$)?([+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*([KMB%])?$/i);if(!m||m[1]&&m[3]==='%')return null;const suffix=(m[3]||'').toUpperCase(),value=Number(m[2].replace(/,/g,''))*({K:1e3,M:1e6,B:1e9}[suffix]||1);return Number.isFinite(value)?{value,unit:suffix==='%'?'%':m[1]?'USD':'number'}:null;}
 function bars(rows){const box=node('div',null,'bars'),lo=Math.min(0,...rows.map(x=>x.value)),hi=Math.max(0,...rows.map(x=>x.value)),span=hi-lo||1;rows.forEach((p,i)=>{const row=node('div',null,'bar-row'),labels=node('div',null,'bar-label');labels.append(node('span',p.label),node('strong',p.text??amount(p.value)));const track=node('div',null,'track'),bar=node('span',null,'bar'+(i===rows.length-1?' last':'')),zero=node('i');bar.style.left=((Math.min(0,p.value)-lo)/span*100)+'%';bar.style.width=(Math.abs(p.value)/span*100)+'%';zero.style.left=(-lo/span*100)+'%';track.setAttribute('aria-hidden','true');track.append(bar,zero);row.append(labels,track);box.append(row);});box.append(node('small','막대는 0 기준 · 항목 안에서 같은 눈금으로 비교해요.'));return box;}
 function figure(f){const e=card(f.label),actual=number(f.actual),rows=[];for(const [label,raw] of [['이전',f.previous],['예상',f.forecast],['발표',f.actual]]){const n=number(raw);if(n&&actual&&n.unit===actual.unit)rows.push({label,value:n.value,text:String(raw)});}if(rows.length>=2)e.append(bars(rows));else for(const [label,raw] of [['발표',f.actual],['예상',f.forecast],['이전',f.previous]])e.append(node('p',label+' · '+(raw??'미제공')));if(f.comparison)e.append(node('p',f.comparison));return e;}
@@ -79,8 +79,7 @@ function releaseMovementCard(detail) {
  };
  entries.forEach((e,i)=>{const b=node('button',e.label);b.id='release-movement-tab-'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls','release-movement-panel');b.onclick=()=>show(e,i);b.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?entries.length-1:(i+(event.key==='ArrowRight'?1:-1)+entries.length)%entries.length;show(entries[next],next);tabs.children[next].focus();}};tabs.append(b);});
  box.append(tabs,panel);show(entries[0],0);
- const remaining=reactionSections.flatMap(s=>clean(s.body).split('\n')).filter(line=>line.trim()&&!/^([^:]+):\s*[+-]?\d+(?:\.\d+)?\s*(%p|%)/.test(line.trim())&&!line.startsWith('발표 직전 기준 →'));
- for(const line of [...new Set(remaining)])box.append(node('small',line));
+ // Match the app: once observations form a chart, do not append the legacy movement paragraph.
  return box;
 }
 function releaseCycle(points,unit) {
@@ -103,18 +102,35 @@ function render(){const r=article.release||{},d=r.detail||{},story=d.story||{};c
  const charts=r.market_charts||[],assets=[...new Set([...charts.map(c=>c.symbol),...(d.visuals||[]).map(v=>v.asset),...(d.sections||[]).map(s=>s.asset)].filter(Boolean))];if(assets.length){if(!assets.includes(selected))selected=assets[0];const tabs=node('nav',null,'asset-tabs');tabs.setAttribute('aria-label','자산 선택');assets.forEach(asset=>{const b=node('button',asset==='BTCUSDT'?'비트코인':asset==='ETHUSDT'?'이더리움':asset);b.setAttribute('aria-pressed',String(asset===selected));b.onclick=()=>{selected=asset;render();};tabs.append(b);});content.append(tabs);}
  const matches=a=>!a||!selected||a===selected;
  for(const c of charts.filter(c=>matches(c.symbol))){const e=card(c.label||c.symbol);e.append(node('p',c.baseline_label),plot(c.points||[],(c.provider||'').includes('USDT')?'USDT':'',[],true),node('small',[c.recent_label,c.provider,stamp(c.observed_at)].filter(Boolean).join(' · ')));source(e,c.source_url);content.append(e);}
- for(const f of r.figures||article.figures||[])content.append(figure(f));
- const movement=releaseMovementCard(d);if(movement)content.append(movement);
- const sections=(d.sections||article.sections||[]).filter(s=>!movement||s.title!=='발표 이후 실제 움직임'),visuals=(d.visuals||[]).filter(v=>matches(v.asset)),shown=new Set();
+ for(const f of (r.figures||article.figures||[]).filter(f=>/[0-9]/.test(f.actual||'')||!String(f.label).includes('연설')))content.append(figure(f));
+ const movement=releaseMovementCard(d);
+ const sections=[...(story.cards||[]),...(d.sections||article.sections||[])].filter(s=>!movement||s.title!=='발표 이후 실제 움직임'),visuals=(d.visuals||[]).filter(v=>matches(v.asset)),shown=new Set();
  for(const s of displaySections(sections.filter(s=>matches(s.asset)),[headline,summary])){if(!clean(s.body))continue;const e=card(s.title==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':s.title);prose(e,s.body);content.append(e);for(const v of visuals.filter(v=>(s.evidenceIds||[]).includes(v.id)&&!shown.has(v.id))){content.append(visual(v));shown.add(v.id);}}
  for(const v of visuals.filter(v=>!shown.has(v.id)))content.append(visual(v));
  for(const p of (movement?[]:d.prices||[]).filter(p=>matches(p.coin==='BTC'?'BTCUSDT':p.coin==='ETH'?'ETHUSDT':p.coin))){const e=card(p.coin+' · 발표 후 가격 흐름');const stages=(p.stages||[]).filter(s=>Number.isFinite(s.value)&&Number.isFinite(s.time));if(stages.length===3){e.append(node('small','발표 직전 가격 대비 · %'),plot(stages.map(s=>({t:s.time,value:s.value,label:s.label})), '%',[],true));stages.forEach(s=>{e.append(node('h3',s.label+' · '+amount(s.value)+'%'));prose(e,s.body);});}else e.append(plot((p.bars||[]).map(b=>({t:b.t,value:b.c})), 'USDT',[],true));e.append(node('small',[p.source,p.endpoint,stamp(p.checked_at)].filter(Boolean).join(' · ')));source(e,p.source_url);content.append(e);}
- const caution=clean(story.caution||article.caution);if(caution){const e=card('함께 확인할 점');prose(e,caution);content.append(e);}if(d.gaps?.length){const e=card('아직 확인되지 않은 점');d.gaps.forEach(t=>prose(e,t));content.append(e);}
+ const caution=clean(story.caution||article.caution);if(caution){const e=card('함께 확인할 점');prose(e,caution);content.append(e);}if(movement)content.append(movement);const gaps=(d.gaps||[]).filter(t=>clean(t)!==caution);if(gaps.length){const e=card('아직 확인되지 않은 점');gaps.forEach(t=>prose(e,t));content.append(e);}
  const refs=[...(d.evidence||[]),...(story.references||[])],seen=new Set();const sources=card('출처와 확인 시각');for(const ref of refs){const url=safeURL(ref.url||ref.source_url);if(url&&!seen.has(url)){source(sources,url,ref.title||'원문 보기 ↗');seen.add(url);}}if(!seen.has(article.source_url))source(sources,article.source_url);if(d.checked_at)sources.append(node('small','분석 확인 · '+stamp(d.checked_at)));content.append(sources);
- $('notice').textContent=['m','s'].includes(kind)?'이 링크는 최신 분석으로 갱신됩니다. 기준 시각을 확인해 주세요.':'';
+ $('notice').textContent=translationStatus() || (['m','s'].includes(kind)?'이 링크는 최신 분석으로 갱신됩니다. 기준 시각을 확인해 주세요.':'');
 }
-async function load(){$('retry').hidden=true;$('notice').textContent='';try{if(!['n','c','m','s'].includes(kind)||id.length>80||(['n','c'].includes(kind)&&!(/^[1-9]\d{0,17}$/.test(id))))throw Error('invalid');const response=await fetch(API+'/rest/v1/rpc/read_shared_content',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kind:kind,p_id:id}),signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('network');article=await response.json();if(!article)throw Error('missing');render();$('kakao-share').disabled=false;if(params.get('share')==='kakao'){$('kakao-share').focus();$('notice').textContent='상단의 카카오톡 공유를 눌러 보낼 대화방을 선택해 주세요.';}}catch(e){$('content').replaceChildren();$('title').textContent=e.message==='invalid'?'올바르지 않은 공유 주소예요.':e.message==='missing'?'공개된 내용을 찾을 수 없어요.':'내용을 불러오지 못했어요.';$('retry').hidden=['invalid','missing'].includes(e.message);}}
-$('retry').onclick=load;$('share').onclick=async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:canonical.href});else{await navigator.clipboard.writeText(canonical.href);$('notice').textContent='공유 링크를 복사했어요.';}}catch(e){if(e.name!=='AbortError')window.prompt('주소를 복사해 주세요.',canonical.href);}};
+async function load(){$('retry').hidden=true;$('notice').textContent='';try{if(!['n','c','m','s'].includes(kind)||id.length>80||(['n','c'].includes(kind)&&!(/^[1-9]\d{0,17}$/.test(id))))throw Error('invalid');const response=await fetch(API+'/rest/v1/rpc/read_shared_content',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kind:kind,p_id:id}),signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('network');article=await response.json();if(!article)throw Error('missing');article=await localizePublication(article,kind,id);render();$('kakao-share').disabled=false;if(params.get('share')==='kakao'){$('kakao-share').focus();$('notice').textContent='상단의 카카오톡 공유를 눌러 보낼 대화방을 선택해 주세요.';}}catch(e){$('content').replaceChildren();$('title').textContent=e.message==='invalid'?'올바르지 않은 공유 주소예요.':e.message==='missing'?'공개된 내용을 찾을 수 없어요.':'내용을 불러오지 못했어요.';$('retry').hidden=['invalid','missing'].includes(e.message);}}
+$('retry').onclick=load;$('share').onclick=async()=>{if(!article)return;const text=shareSummary(article,canonical.href);try{if(navigator.share)await navigator.share({text});else{await navigator.clipboard.writeText(text);$('notice').textContent='요약과 링크를 복사했어요. 보낼 대화방에 붙여넣어 주세요.';}}catch(e){if(e.name!=='AbortError')window.prompt('요약과 링크를 복사해 주세요.',text);}};
+
+function shareSummary(article,url) {
+ const release=article.release||{},detail=release.detail||{},story=detail.story||{};
+ const title=clean(article.article_title||release.heading||article.title);
+ const blocks=['📊 '+title],seen=new Set();
+ const append=(heading,body)=>{const value=clean(body||'').trim();if(value&&!seen.has(value)){seen.add(value);blocks.push(heading+'\n'+value);}};
+ const figures=(release.figures||[]).filter(f=>/[0-9]/.test(f.actual||'')||!String(f.label).includes('연설')).slice(0,3);
+ if(figures.length) blocks.push('📌 발표 결과\n'+figures.map(f=> '• '+clean(f.label)+': '+['발표 '+clean(f.actual),f.forecast&&'예상 '+clean(f.forecast),f.previous&&'이전 '+clean(f.previous),f.comparison&&clean(f.comparison)].filter(Boolean).join(' · ')).join('\n'));
+ append('💡 핵심 해석',story.summary||detail.answer||release.summary||article.summary);
+ const excerpts=story.cards||detail.sections||[];
+ excerpts.filter(c=>c.title!=='발표 이후 실제 움직임').slice(0,3).forEach(c=>append('🔎 '+(c.title==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':clean(c.title)),c.body));
+ const next=(detail.sections||[]).find(s=>/다음|앞으로|변경 조건/.test(s.title||''));
+ if(next)append('🔎 '+clean(next.title),next.body);
+ append('📍 함께 확인할 점',story.caution);
+ blocks.push('차트와 자세한 분석 근거는 위드핀덱스에서 확인하세요.',url);
+ return blocks.join('\n\n');
+}
 
 function kakaoCard(article, url) {
  const release=article.release||{}, detail=release.detail||{}, story=detail.story||{};

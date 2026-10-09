@@ -1,5 +1,7 @@
 /* Motion-only enhancement. Product screenshots and analysis copy are unchanged. */
 (()=>{
+  // Touch scrolling uses the static mobile layout, without per-word geometry work.
+  if(matchMedia("(max-width: 760px), (prefers-reduced-motion: reduce)").matches)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp=x=>Math.max(0,Math.min(1,x));
   const ease=x=>{x=clamp(x);return x*x*(3-2*x)};
