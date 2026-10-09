@@ -11,13 +11,13 @@ function displaySections(sections, initial = []) {
  const seen = new Set(initial.map(key));
  return sections.filter(section => {
   const body = key(section.body);
-  if (!body || body.includes('발표 뒤 확보한 현황이에요.') || seen.has(body)) return false;
+  if (!body || clean(section.source_body||section.body).includes('발표 뒤 확보한 현황이에요.') || seen.has(body)) return false;
   seen.add(body); return true;
  });
 }
-const node = (tag, text, cls) => { const e=document.createElement(tag); if(text!=null)e.textContent=clean(String(text)); if(cls)e.className=cls; return e; };
+const node = (tag, text, cls) => { const e=document.createElement(tag); if(text!=null)e.textContent=publicationUIText(clean(String(text))); if(cls)e.className=cls; return e; };
 const safeURL = value => { try { const u=new URL(value); return u.protocol==='https:'?u.href:null; } catch { return null; } };
-const stamp = value => { const d=new Date(value); return Number.isFinite(+d)?d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' KST':''; };
+const stamp = value => { const d=new Date(value); return Number.isFinite(+d)?d.toLocaleString(publicationLanguage,{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' KST':''; };
 const amount = n => n.toLocaleString('ko-KR',{maximumFractionDigits:2});
 const params=new URLSearchParams(location.search), kind=params.get('k')||'n', id=params.get('n')||'';
 const canonical=new URL('https://withfindex.com/o/'); canonical.searchParams.set('k',kind); canonical.searchParams.set('n',id);
@@ -49,9 +49,9 @@ function visual(v){const e=card(v.title,'visual'),p=(v.points||[]).filter(p=>typ
  }prose(e,v.caption);if(v.observed_at)e.append(node('small','자료 시각 · '+stamp(v.observed_at)));source(e,v.source_url);return e;}
 
 function releaseMovementCard(detail) {
- const reactionSections=(detail.sections||[]).filter(s=>s.title==='발표 이후 실제 움직임');
+ const reactionSections=(detail.sections||[]).filter(s=>(s.source_title||s.title)==='발표 이후 실제 움직임');
  const entries=[];
- for(const section of reactionSections) for(const line of clean(section.body).split('\n')) {
+ for(const section of reactionSections) for(const line of clean(section.source_body||section.body).split('\n')) {
   const m=line.trim().match(/^([^:]+):\s*([+-]?\d+(?:\.\d+)?)\s*(%p|%)\s*(?:\(([^)]+)\))?$/);
   if(m) entries.push({key:m[1].trim(),label:m[1].trim(),unit:m[3],points:[{value:0,label:'발표 직전'},{value:+m[2],label:'확인 시점'}],period:m[4]||'',note:'시작·끝 관측값 비교 · 중간 가격 경로는 표시하지 않아요.'});
  }
@@ -104,8 +104,8 @@ function render(){const r=article.release||{},d=r.detail||{},story=d.story||{};c
  for(const c of charts.filter(c=>matches(c.symbol))){const e=card(c.label||c.symbol);e.append(node('p',c.baseline_label),plot(c.points||[],(c.provider||'').includes('USDT')?'USDT':'',[],true),node('small',[c.recent_label,c.provider,stamp(c.observed_at)].filter(Boolean).join(' · ')));source(e,c.source_url);content.append(e);}
  for(const f of (r.figures||article.figures||[]).filter(f=>/[0-9]/.test(f.actual||'')||!String(f.label).includes('연설')))content.append(figure(f));
  const movement=releaseMovementCard(d);
- const sections=[...(story.cards||[]),...(d.sections||article.sections||[])].filter(s=>!movement||s.title!=='발표 이후 실제 움직임'),visuals=(d.visuals||[]).filter(v=>matches(v.asset)),shown=new Set();
- for(const s of displaySections(sections.filter(s=>matches(s.asset)),[headline,summary])){if(!clean(s.body))continue;const e=card(s.title==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':s.title);prose(e,s.body);content.append(e);for(const v of visuals.filter(v=>(s.evidenceIds||[]).includes(v.id)&&!shown.has(v.id))){content.append(visual(v));shown.add(v.id);}}
+ const sections=[...(story.cards||[]),...(d.sections||article.sections||[])].filter(s=>!movement||(s.source_title||s.title)!=='발표 이후 실제 움직임'),visuals=(d.visuals||[]).filter(v=>matches(v.asset)),shown=new Set();
+ for(const s of displaySections(sections.filter(s=>matches(s.asset)),[headline,summary])){if(!clean(s.body))continue;const e=card((s.source_title||s.title)==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':s.title);prose(e,s.body);content.append(e);for(const v of visuals.filter(v=>(s.evidenceIds||[]).includes(v.id)&&!shown.has(v.id))){content.append(visual(v));shown.add(v.id);}}
  for(const v of visuals.filter(v=>!shown.has(v.id)))content.append(visual(v));
  for(const p of (movement?[]:d.prices||[]).filter(p=>matches(p.coin==='BTC'?'BTCUSDT':p.coin==='ETH'?'ETHUSDT':p.coin))){const e=card(p.coin+' · 발표 후 가격 흐름');const stages=(p.stages||[]).filter(s=>Number.isFinite(s.value)&&Number.isFinite(s.time));if(stages.length===3){e.append(node('small','발표 직전 가격 대비 · %'),plot(stages.map(s=>({t:s.time,value:s.value,label:s.label})), '%',[],true));stages.forEach(s=>{e.append(node('h3',s.label+' · '+amount(s.value)+'%'));prose(e,s.body);});}else e.append(plot((p.bars||[]).map(b=>({t:b.t,value:b.c})), 'USDT',[],true));e.append(node('small',[p.source,p.endpoint,stamp(p.checked_at)].filter(Boolean).join(' · ')));source(e,p.source_url);content.append(e);}
  const caution=clean(story.caution||article.caution);if(caution){const e=card('함께 확인할 점');prose(e,caution);content.append(e);}if(movement)content.append(movement);const gaps=(d.gaps||[]).filter(t=>clean(t)!==caution);if(gaps.length){const e=card('아직 확인되지 않은 점');gaps.forEach(t=>prose(e,t));content.append(e);}
@@ -124,7 +124,7 @@ function shareSummary(article,url) {
  if(figures.length) blocks.push('📌 발표 결과\n'+figures.map(f=> '• '+clean(f.label)+': '+['발표 '+clean(f.actual),f.forecast&&'예상 '+clean(f.forecast),f.previous&&'이전 '+clean(f.previous),f.comparison&&clean(f.comparison)].filter(Boolean).join(' · ')).join('\n'));
  append('💡 핵심 해석',story.summary||detail.answer||release.summary||article.summary);
  const excerpts=story.cards||detail.sections||[];
- excerpts.filter(c=>c.title!=='발표 이후 실제 움직임').slice(0,3).forEach(c=>append('🔎 '+(c.title==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':clean(c.title)),c.body));
+ excerpts.filter(c=>(c.source_title||c.title)!=='발표 이후 실제 움직임').slice(0,3).forEach(c=>append('🔎 '+(c.title==='결과를 어떻게 읽나요?'?'발표된 지표를 어떻게 해석해야 하나요?':clean(c.title)),c.body));
  const next=(detail.sections||[]).find(s=>/다음|앞으로|변경 조건/.test(s.title||''));
  if(next)append('🔎 '+clean(next.title),next.body);
  append('📍 함께 확인할 점',story.caution);
@@ -151,4 +151,4 @@ $('kakao-share').onclick=()=>{
  }
 };
 
-load();
+initializePublicationLanguage().then(load);
