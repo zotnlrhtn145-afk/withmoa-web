@@ -17,14 +17,14 @@
   if(match('youtube.com')||match('youtu.be'))return 'youtube';
   if(match('duckduckgo.com')||match('yahoo.com')||match('baidu.com'))return 'other_search';
   if(tag==='shared_link')return 'shared_link';
-  if(h&&h!==u.hostname&&!match('withfindex.com')&&h!=='zotnlrhtn145-afk.github.io')return 'other_referral';
+  if(h&&h!==u.hostname&&!match('withfindex.com')&&!match('withfindex.co.kr')&&h!=='zotnlrhtn145-afk.github.io')return 'other_referral';
   return 'direct';
  };
  if(typeof module!=='undefined')module.exports={source};
  if(typeof window==='undefined'||window.__findexTrafficStarted)return;
  window.__findexTrafficStarted=true;
  const loc=window.location,params=new URLSearchParams(loc.search);
- if(!['withfindex.com','www.withfindex.com','zotnlrhtn145-afk.github.io'].includes(loc.hostname)||params.has('admin')||params.has('video_stats')||navigator.doNotTrack==='1'||navigator.globalPrivacyControl||/bot|crawler|spider|headless|preview/i.test(navigator.userAgent))return;
+ if(!['withfindex.com','www.withfindex.com','withfindex.co.kr','www.withfindex.co.kr','zotnlrhtn145-afk.github.io'].includes(loc.hostname)||params.has('admin')||params.has('video_stats')||navigator.doNotTrack==='1'||navigator.globalPrivacyControl||/bot|crawler|spider|headless|preview/i.test(navigator.userAgent))return;
  const key='withfindex-traffic-device-v1';let visitor;
  try{visitor=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(visitor||'')){visitor=crypto.randomUUID();localStorage.setItem(key,visitor);}}catch{return}
  const surface=document.currentScript?.dataset.surface||'webapp';
