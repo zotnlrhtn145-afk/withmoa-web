@@ -145,7 +145,7 @@ $('kakao-share').onclick=()=>{
  try {
   if(!window.Kakao)throw Error('sdk');
   if(!Kakao.isInitialized())Kakao.init('c4b2d195627183d9d59d103c0082c8a8');
-  Kakao.Share.sendDefault(kakaoCard(article,canonical.href));
+  const tagged=new URL(canonical.href);tagged.searchParams.set('utm_source','kakao');Kakao.Share.sendDefault(kakaoCard(article,tagged.href));
  } catch {
   $('notice').textContent='카카오톡 공유를 열지 못했어요. 다시 시도하거나 링크 공유를 이용해 주세요.';
  }
