@@ -24,14 +24,16 @@
  if(typeof window==='undefined'||window.__findexTrafficStarted)return;
  window.__findexTrafficStarted=true;
  const loc=window.location,params=new URLSearchParams(loc.search);
- if(!['withfindex.com','www.withfindex.com','withfindex.co.kr','www.withfindex.co.kr','zotnlrhtn145-afk.github.io'].includes(loc.hostname)||params.has('admin')||params.has('video_stats')||navigator.doNotTrack==='1'||navigator.globalPrivacyControl||/bot|crawler|spider|headless|preview/i.test(navigator.userAgent))return;
+ if(!['withfindex.com','www.withfindex.com','withfindex.co.kr','www.withfindex.co.kr','zotnlrhtn145-afk.github.io'].includes(loc.hostname)||/^\/_admin(?:\/|$)/.test(loc.pathname)||params.has('admin')||params.has('video_stats')||navigator.doNotTrack==='1'||navigator.globalPrivacyControl)return;
  const key='withfindex-traffic-device-v1';let visitor;
  try{visitor=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(visitor||'')){visitor=crypto.randomUUID();localStorage.setItem(key,visitor);}}catch{return}
  const surface=document.currentScript?.dataset.surface||'webapp';
- let sentAt=0;
- const send=()=>{if(document.visibilityState!=='visible'||Date.now()-sentAt<1500)return;sentAt=Date.now();
- const body={p_visitor:visitor,p_event:crypto.randomUUID(),p_platform:'web',p_source:source(loc.href,document.referrer,navigator.userAgent),p_surface:surface};
- fetch('https://nqdeyeonxabotddzibmx.supabase.co/rest/v1/rpc/record_traffic_open',{method:'POST',headers:{apikey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xZGV5ZW9ueGFib3RkZHppYm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMjkxNTIsImV4cCI6MjEwMjgwNTE1Mn0.60xlEXLypRK5MVGo2t-vzPSmvb9I12j887wgW2iIUTQ','Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true}).catch(()=>{});
+ let sentAt=0,currentEvent=null,interacted=false;
+ const send=(signal='open')=>{if(document.visibilityState!=='visible'||(signal==='open'&&Date.now()-sentAt<1500))return;if(signal==='open'){sentAt=Date.now();currentEvent=crypto.randomUUID();interacted=false;}if(!currentEvent)return;
+ const body={p_visitor:visitor,p_event:currentEvent,p_signal:signal,p_automated:navigator.webdriver===true,p_platform:'web',p_source:source(loc.href,document.referrer,navigator.userAgent),p_surface:surface};
+ fetch('https://nqdeyeonxabotddzibmx.supabase.co/rest/v1/rpc/record_traffic_open_v2',{method:'POST',headers:{apikey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xZGV5ZW9ueGFib3RkZHppYm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMjkxNTIsImV4cCI6MjEwMjgwNTE1Mn0.60xlEXLypRK5MVGo2t-vzPSmvb9I12j887wgW2iIUTQ','Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true}).catch(()=>{});
  };
- send();document.addEventListener('visibilitychange',send);window.addEventListener('pageshow',e=>{if(e.persisted)send()});
+ const interaction=e=>{if(!e.isTrusted||interacted||document.visibilityState!=='visible')return;interacted=true;send('interaction')};
+ ['pointerdown','keydown','touchstart'].forEach(name=>document.addEventListener(name,interaction,{passive:true}));
+ send();document.addEventListener('visibilitychange',()=>send());window.addEventListener('pageshow',e=>{if(e.persisted)send()});
 })();
